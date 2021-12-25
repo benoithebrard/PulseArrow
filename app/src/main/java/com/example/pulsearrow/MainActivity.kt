@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         val pulseArrowDown: AppCompatImageView = findViewById(R.id.pulse_arrow_down)
 
         pulseButton.setOnClickListener {
-            val pulseCount: Int = (0..5).random()
+            val pulseCount: Int = (1..5).random()
             val isUp: Boolean = Random.nextBoolean()
             Toast.makeText(this, "pulse $pulseCount times (up=$isUp)", Toast.LENGTH_SHORT).show()
 
@@ -38,21 +38,13 @@ class MainActivity : AppCompatActivity() {
             if (isUp) {
                 previousAnimation = pulseArrowUp.animatePulse(
                     isUp = true,
-                    nextAnimation = {
-                        animatePulse(
-                            isUp = true
-                        )
-                    }
+                    pulseCount = pulseCount - 1
                 )
                 previousAnimatedArrow = pulseArrowUp
             } else {
                 previousAnimation = pulseArrowDown.animatePulse(
                     isUp = false,
-                    nextAnimation = {
-                        animatePulse(
-                            isUp = false
-                        )
-                    }
+                    pulseCount = pulseCount - 1
                 )
                 previousAnimatedArrow = pulseArrowDown
             }
@@ -73,7 +65,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun ImageView.animatePulse(
         isUp: Boolean,
-        nextAnimation: ImageView.() -> Unit = {},
+        pulseCount: Int,
     ): ViewPropertyAnimator {
         val verticalTranslation = if (isUp) -20f else 20f
         return animate().alpha(1f).xBy(20f).yBy(verticalTranslation).withStartAction {
@@ -85,7 +77,12 @@ class MainActivity : AppCompatActivity() {
                     translationX = 20f
                     translationY = verticalTranslation
                 }.withEndAction {
-                    nextAnimation()
+                    if (pulseCount > 0) {
+                        animatePulse(
+                            isUp = isUp,
+                            pulseCount = pulseCount - 1
+                        )
+                    }
                 }
         }
     }
