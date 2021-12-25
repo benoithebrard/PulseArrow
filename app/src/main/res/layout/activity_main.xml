@@ -6,13 +6,58 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/pulse_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:text="Pulse"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias=".25" />
+
+    <TextView
+        android:id="@+id/status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_blue_light"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:minWidth="80dp"
+        android:minHeight="40dp"
+        android:padding="5dp"
+        android:text="--"
+        android:textAllCaps="true"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/pulse_button" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/pulse_arrow_up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0"
+        android:padding="5dp"
+        android:rotation="0"
+        android:src="@drawable/triangle_black"
+        android:tint="@android:color/holo_green_dark"
+        app:layout_constraintBottom_toTopOf="@id/status_text"
+        app:layout_constraintStart_toEndOf="@id/status_text" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/pulse_arrow_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0"
+        android:padding="5dp"
+        android:rotation="180"
+        android:src="@drawable/triangle_black"
+        android:tint="@android:color/holo_red_dark"
+        app:layout_constraintStart_toEndOf="@id/status_text"
+        app:layout_constraintTop_toBottomOf="@id/status_text" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
