@@ -38,13 +38,19 @@ class MainActivity : AppCompatActivity() {
             if (isUp) {
                 previousAnimation = pulseArrowUp.animatePulse(
                     isUp = true,
-                    pulseCount = pulseCount - 1
+                    pulseCount = pulseCount - 1,
+                    onAnimationEnded = {
+                        statusText.animateReset()
+                    }
                 )
                 previousAnimatedArrow = pulseArrowUp
             } else {
                 previousAnimation = pulseArrowDown.animatePulse(
                     isUp = false,
-                    pulseCount = pulseCount - 1
+                    pulseCount = pulseCount - 1,
+                    onAnimationEnded = {
+                        statusText.animateReset()
+                    }
                 )
                 previousAnimatedArrow = pulseArrowDown
             }
@@ -53,8 +59,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun TextView.animateCrossFade(
         isUp: Boolean,
-    ) {
-        animate().setDuration(500L).alpha(0f).withEndAction {
+    ): ViewPropertyAnimator {
+        return animate().setDuration(500L).alpha(0f).withEndAction {
             background = ColorDrawable(if (isUp) ContextCompat.getColor(context,
                 android.R.color.holo_green_dark) else
                 ContextCompat.getColor(context, android.R.color.holo_red_dark))
@@ -63,16 +69,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun TextView.animateReset(): ViewPropertyAnimator {
+        return animate().setDuration(500L).alpha(0f).withEndAction {
+            background = ColorDrawable(ContextCompat.getColor(context,
+                android.R.color.holo_blue_light))
+            text = "--"
+            animate().setDuration(500L).alpha(1f)
+        }
+    }
+
     private fun ImageView.animatePulse(
         isUp: Boolean,
         pulseCount: Int,
+        onAnimationEnded: () -> ViewPropertyAnimator,
     ): ViewPropertyAnimator {
         val verticalTranslation = if (isUp) -20f else 20f
+        val fadeOutStartDelay = if (pulseCount == 0) 2000L else 500L
+
         return animate().alpha(1f).xBy(20f).yBy(verticalTranslation).withStartAction {
             translationX = 0f
             translationY = 0f
         }.withEndAction {
-            animate().setStartDelay(500L).alpha(0f).xBy(-20f).yBy(-verticalTranslation)
+            animate().setStartDelay(fadeOutStartDelay).alpha(0f).xBy(-20f).yBy(-verticalTranslation)
                 .withStartAction {
                     translationX = 20f
                     translationY = verticalTranslation
@@ -80,8 +98,11 @@ class MainActivity : AppCompatActivity() {
                     if (pulseCount > 0) {
                         animatePulse(
                             isUp = isUp,
-                            pulseCount = pulseCount - 1
+                            pulseCount = pulseCount - 1,
+                            onAnimationEnded
                         )
+                    } else {
+                        onAnimationEnded()
                     }
                 }
         }
