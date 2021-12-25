@@ -2,6 +2,8 @@ package com.example.pulsearrow
 
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.ViewPropertyAnimator
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +13,9 @@ import androidx.core.content.ContextCompat
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
+
+    private var previousAnimation: ViewPropertyAnimator? = null
+    private var previousAnimatedArrow: ImageView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,32 +31,62 @@ class MainActivity : AppCompatActivity() {
             val isUp: Boolean = Random.nextBoolean()
             Toast.makeText(this, "pulse $pulseCount times (up=$isUp)", Toast.LENGTH_SHORT).show()
 
-            statusText.animate().setDuration(500L).alpha(0f).withEndAction {
-                statusText.background = ColorDrawable(if (isUp) ContextCompat.getColor(this,
-                    android.R.color.holo_green_dark) else
-                    ContextCompat.getColor(this, android.R.color.holo_red_dark))
-                statusText.text = if (isUp) "UP" else "DOWN"
-
-                statusText.animate().setDuration(500L).alpha(1f)
-            }
+            statusText.animateCrossFade(isUp)
+            previousAnimation?.cancel()
+            previousAnimatedArrow?.alpha = 0f
 
             if (isUp) {
-                pulseArrowUp.animate().alpha(1f).xBy(20f).yBy(-20f).withStartAction {
-                    pulseArrowUp.translationX = 0f
-                    pulseArrowUp.translationY = 0f
-                }.withEndAction {
-                    pulseArrowUp.animate().setStartDelay(500L).alpha(0f).xBy(-20f).yBy(20f)
-                }
+                previousAnimation = pulseArrowUp.animatePulse(
+                    isUp = true,
+                    nextAnimation = {
+                        animatePulse(
+                            isUp = true
+                        )
+                    }
+                )
+                previousAnimatedArrow = pulseArrowUp
             } else {
-                pulseArrowDown.animate().alpha(1f).xBy(20f).yBy(20f).withStartAction {
-                    pulseArrowDown.translationX = 0f
-                    pulseArrowDown.translationY = 0f
-                }.withEndAction {
-                    pulseArrowDown.animate().setStartDelay(500L).alpha(0f).xBy(-20f).yBy(-20f)
-                }
+                previousAnimation = pulseArrowDown.animatePulse(
+                    isUp = false,
+                    nextAnimation = {
+                        animatePulse(
+                            isUp = false
+                        )
+                    }
+                )
+                previousAnimatedArrow = pulseArrowDown
             }
         }
+    }
 
+    private fun TextView.animateCrossFade(
+        isUp: Boolean,
+    ) {
+        animate().setDuration(500L).alpha(0f).withEndAction {
+            background = ColorDrawable(if (isUp) ContextCompat.getColor(context,
+                android.R.color.holo_green_dark) else
+                ContextCompat.getColor(context, android.R.color.holo_red_dark))
+            text = if (isUp) "UP" else "DOWN"
+            animate().setDuration(500L).alpha(1f)
+        }
+    }
 
+    private fun ImageView.animatePulse(
+        isUp: Boolean,
+        nextAnimation: ImageView.() -> Unit = {},
+    ): ViewPropertyAnimator {
+        val verticalTranslation = if (isUp) -20f else 20f
+        return animate().alpha(1f).xBy(20f).yBy(verticalTranslation).withStartAction {
+            translationX = 0f
+            translationY = 0f
+        }.withEndAction {
+            animate().setStartDelay(500L).alpha(0f).xBy(-20f).yBy(-verticalTranslation)
+                .withStartAction {
+                    translationX = 20f
+                    translationY = verticalTranslation
+                }.withEndAction {
+                    nextAnimation()
+                }
+        }
     }
 }
