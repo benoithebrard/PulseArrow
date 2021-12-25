@@ -1,6 +1,5 @@
 package com.example.pulsearrow
 
-import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.widget.TextView
@@ -8,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.content.ContextCompat
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
@@ -21,25 +21,32 @@ class MainActivity : AppCompatActivity() {
         val pulseArrowUp: AppCompatImageView = findViewById(R.id.pulse_arrow_up)
         val pulseArrowDown: AppCompatImageView = findViewById(R.id.pulse_arrow_down)
 
-        statusText.background = ColorDrawable(Color.GRAY)
-
         pulseButton.setOnClickListener {
             val pulseCount: Int = (0..5).random()
             val isUp: Boolean = Random.nextBoolean()
             Toast.makeText(this, "pulse $pulseCount times (up=$isUp)", Toast.LENGTH_SHORT).show()
 
             statusText.animate().setDuration(500L).alpha(0f).withEndAction {
-                statusText.background = ColorDrawable(if (isUp) Color.GREEN else Color.RED)
+                statusText.background = ColorDrawable(if (isUp) ContextCompat.getColor(this,
+                    android.R.color.holo_green_dark) else
+                    ContextCompat.getColor(this, android.R.color.holo_red_dark))
                 statusText.text = if (isUp) "UP" else "DOWN"
+
                 statusText.animate().setDuration(500L).alpha(1f)
             }
 
             if (isUp) {
-                pulseArrowUp.animate().alpha(1f).xBy(20f).yBy(-20f).withEndAction {
+                pulseArrowUp.animate().alpha(1f).xBy(20f).yBy(-20f).withStartAction {
+                    pulseArrowUp.translationX = 0f
+                    pulseArrowUp.translationY = 0f
+                }.withEndAction {
                     pulseArrowUp.animate().setStartDelay(500L).alpha(0f).xBy(-20f).yBy(20f)
                 }
             } else {
-                pulseArrowDown.animate().alpha(1f).xBy(20f).yBy(20f).withEndAction {
+                pulseArrowDown.animate().alpha(1f).xBy(20f).yBy(20f).withStartAction {
+                    pulseArrowDown.translationX = 0f
+                    pulseArrowDown.translationY = 0f
+                }.withEndAction {
                     pulseArrowDown.animate().setStartDelay(500L).alpha(0f).xBy(-20f).yBy(-20f)
                 }
             }
